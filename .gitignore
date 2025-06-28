@@ -1,0 +1,13 @@
+# 環境変数ファイル
+env.js
+
+# ノードモジュール
+node_modules/
+
+# ビルドファイル
+dist/
+build/
+
+# OSファイル
+.DS_Store
+Thumbs.db

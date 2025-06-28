@@ -1,0 +1,204 @@
+body {
+    margin: 0;
+    font-family: "Arial", sans-serif;
+    background-color: #f5f5f5;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.chat-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.chat-box {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.chat-message {
+    display: flex;
+    margin: 10px;
+    max-width: 80%;
+}
+
+/* ユーザーの吹き出し（右寄せ・ピンク） */
+.chat-message.user {
+    justify-content: flex-end;
+}
+
+.chat-message.bot {
+  align-items: flex-start;
+}
+
+.bubble {
+  display: inline-block;
+  background-color: #ffe6f3;
+  padding: 10px 14px;
+  border-radius: 16px;
+  max-width: 60%;
+  font-size: 16px;
+  line-height: 1.5;
+  word-break: break-word;
+  margin: 0 10px;
+}
+
+.chat-message.user .bubble {
+  background-color: #ff69b4;
+  color: white;
+}
+
+.chat-message img {
+  margin-top: 8px;
+  max-width: 200px;
+  border-radius: 16px;
+  display: block;
+  margin: 0 auto;
+}
+
+.input-area {
+    padding: 15px;
+    background-color: #fff;
+    border-top: 1px solid #ddd;
+}
+
+#user-input {
+    width: 80%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    font-size: 16px;
+    resize: none;
+    background-color: #fff;
+}
+
+#send-button {
+    padding: 10px 20px;
+    background-color: #ff69b4;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#send-button:hover {
+    background-color: #ff45a1;
+}
+
+.bgm-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.bgm-toggle:hover {
+    background-color: #f5f5f5;
+    transform: scale(1.05);
+}
+}
+
+/* スクロール時のアニメーション */
+.chat-box {
+  scroll-behavior: smooth;
+}
+  
+  .chat-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .chat-box {
+    height: 80vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 10px;
+  }
+  
+  .message {
+    display: flex;
+    flex-direction: column;
+    margin: 10px 0;
+  }
+  
+  .message.user {
+    align-items: flex-end;
+  }
+  
+  .message.hana {
+    align-items: flex-start;
+  }
+  
+  .bubble {
+    max-width: 70%;
+    padding: 10px 14px;
+    border-radius: 16px;
+    background-color: #ffffff;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .message.user .bubble {
+    background-color: #d6f5c9;
+  }
+  
+  .chat-image {
+    max-width: 200px;
+    height: auto;
+    border-radius: 10px;
+    margin-top: 5px;
+    object-fit: contain;
+  }
+  
+  .input-area {
+    display: flex;
+    margin-top: 10px;
+  }
+  
+  #user-input {
+    flex-grow: 1;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    outline: none;
+    resize: none;
+  }
+  
+  #send-button {
+    background-color: #28c03c;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 0 20px;
+    font-size: 16px;
+    margin-left: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  #send-button:hover {
+    background-color: #1a9a2c;
+  }
+  

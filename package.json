@@ -1,0 +1,16 @@
+{
+  "name": "hana-chat",
+  "version": "1.0.0",
+  "description": "咲々木 花とのチャットアプリ",
+  "main": "netlify/functions/chat.js",
+  "scripts": {
+    "build": "echo 'Building...'",
+    "deploy": "netlify deploy"
+  },
+  "dependencies": {
+    "openai": "^4.24.1"
+  },
+  "devDependencies": {
+    "netlify-cli": "^15.0.0"
+  }
+}
