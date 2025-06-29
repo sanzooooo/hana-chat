@@ -6,14 +6,14 @@ const bgmPlayer = document.getElementById('bgm-player');
 
 // ===== BGM設定 =====
 const bgmFiles = [
-  "bgm/bgm_chill.mp3",
-  "bgm/bgm_future.mp3",
-  "bgm/bgm_happy.mp3",
-  "bgm/bgm_hero.mp3",
-  "bgm/bgm_hitroad.mp3",
-  "bgm/bgm_nomonomo.mp3",
-  "bgm/bgm_notdone.mp3",
-  "bgm/bgm_tiara.mp3"
+  "/bgm/bgm_chill.mp3",
+  "/bgm/bgm_future.mp3",
+  "/bgm/bgm_happy.mp3",
+  "/bgm/bgm_hero.mp3",
+  "/bgm/bgm_hitroad.mp3",
+  "/bgm/bgm_nomonomo.mp3",
+  "/bgm/bgm_notdone.mp3",
+  "/bgm/bgm_tiara.mp3"
 ];
 
 let playlist = [];
@@ -50,7 +50,7 @@ function playNextTrack() {
     currentIndex = 0;
   }
   bgmPlayer.src = playlist[currentIndex];
-  bgmPlayer.play();
+  bgmPlayer.play().catch(e => console.warn('再生できなかった理由:', e));
 }
 
 bgmPlayer.addEventListener('ended', playNextTrack);
