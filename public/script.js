@@ -30,6 +30,14 @@ input.addEventListener('focus', () => {
   }, 300); // iOSキーボードのアニメーション待ち
 });
 
+// チャットが自動で下までスクロールするようにする
+function scrollToBottom() {
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// メッセージ送信後や新しいメッセージが追加されたときに呼び出す
+chatBox.addEventListener('DOMNodeInserted', scrollToBottom);
+
 // 送信ボタンの初期化と入力イベントリスナー
 sendButton.disabled = true;
 input.addEventListener('input', () => {
@@ -337,11 +345,47 @@ async function handleSend() {
 }
 
 // イベントリスナーの設定
-sendButton.addEventListener('click', () => {
-  handleSend();
-  // ユーザーがメッセージを送信したときにBGMを再生
-  bgmPlayer.play();
+// 送信ボタンクリック
+sendButton.addEventListener('click', async (event) => {
+  event.preventDefault(); // デフォルトのフォーム送信を防ぐ
+  try {
+    await handleSend();
+    bgmPlayer.play();
+  } catch (error) {
+    console.error('メッセージ送信エラー:', error);
+    // エラー時も送信ボタンを有効化
+    sendButton.disabled = false;
+  }
 });
+
+// エンターキー押下
+input.addEventListener('keypress', async (event) => {
+  if (event.key === 'Enter' && !event.shiftKey) {
+    event.preventDefault(); // デフォルトのエンターキー動作を防ぐ
+    try {
+      await handleSend();
+      bgmPlayer.play();
+    } catch (error) {
+      console.error('メッセージ送信エラー:', error);
+      sendButton.disabled = false;
+    }
+  }
+});
+
+// フォーム送信
+const form = document.querySelector('form');
+if (form) {
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault(); // デフォルトのフォーム送信を防ぐ
+    try {
+      await handleSend();
+      bgmPlayer.play();
+    } catch (error) {
+      console.error('メッセージ送信エラー:', error);
+      sendButton.disabled = false;
+    }
+  });
+}
 
 // 日本語入力中の判定
 let isComposing = false;
