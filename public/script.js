@@ -35,63 +35,27 @@ function shuffle(array) {
   return result;
 }
 
-function initBGM() {
-  shuffledPlaylist = shuffle(bgmFiles);
-  currentIndex = 0;
-  bgmPlayer.src = shuffledPlaylist[currentIndex];
-  bgmPlayer.volume = 0.5;
-  bgmPlayer.loop = false;
-
-  const playPromise = bgmPlayer.play();
-  if (playPromise !== undefined) {
-    playPromise
-      .then(() => {
-        isPlaying = true;
-        bgmToggle.textContent = '🔇 BGM OFF';
-      })
-      .catch((error) => {
-        console.warn('自動再生ブロック：ユーザー操作が必要です');
-        bgmToggle.textContent = '🔊 BGM ON';
-        isPlaying = false;
-      });
-  }
-}
-
-function playNextTrack() {
-  currentIndex++;
-  if (currentIndex >= shuffledPlaylist.length) {
+function loadBGM() {
+  if (shuffledPlaylist.length === 0 || currentIndex >= shuffledPlaylist.length) {
     shuffledPlaylist = shuffle(bgmFiles);
     currentIndex = 0;
   }
   bgmPlayer.src = shuffledPlaylist[currentIndex];
-  bgmPlayer.play();
+  bgmPlayer.volume = 0.5;
+  bgmPlayer.play().then(() => {
+    isPlaying = true;
+    bgmToggle.textContent = '🔇 BGM OFF';
+  }).catch((err) => {
+    console.warn('BGM再生失敗:', err);
+    isPlaying = false;
+    bgmToggle.textContent = '🔊 BGM ON';
+  });
 }
 
-bgmPlayer.addEventListener('ended', playNextTrack);
-
-bgmToggle.addEventListener('click', () => {
-  if (bgmPlayer.paused) {
-    bgmPlayer.play();
-    bgmToggle.textContent = '🔇 BGM OFF';
-    isPlaying = true;
-  } else {
-    bgmPlayer.pause();
-    bgmToggle.textContent = '🔊 BGM ON';
-    isPlaying = false;
-  }
-});
-
-// ===== 初期化 =====
-window.addEventListener('load', () => {
-  initBGM();
-
-  const hour = new Date().getHours();
-  let greeting = '';
-  if (hour < 10) greeting = `おはよう☀️ 今日もがんばろっ♪ ${userName}ちゃん`;
-  else if (hour < 18) greeting = `こんにちは🌼 今日も楽しくいこうね！ ${userName}ちゃん`;
-  else greeting = `こんばんは🌙 ゆっくりできてる？ ${userName}ちゃん`;
-
-  addMessage('hana', greeting);
+// 再生終了時、次の曲へ
+bgmPlayer.addEventListener('ended', () => {
+  currentIndex++;
+  loadBGM();
 });
 
 // ===== メッセージ表示関数 =====
@@ -106,6 +70,22 @@ function addMessage(sender, text, imageSrc = null) {
   chatBox.appendChild(messageDiv);
   chatBox.scrollTop = chatBox.scrollHeight;
 }
+
+// 初期化（ページロード時）
+window.addEventListener('load', () => {
+  shuffledPlaylist = shuffle(bgmFiles);
+  currentIndex = 0;
+  isPlaying = false;
+  bgmToggle.textContent = '🔊 BGM ON';
+
+  const hour = new Date().getHours();
+  let greeting = '';
+  if (hour < 10) greeting = `おはよう☀️ 今日もがんばろっ♪ ${userName}ちゃん`;
+  else if (hour < 18) greeting = `こんにちは🌼 今日も楽しくいこうね！ ${userName}ちゃん`;
+  else greeting = `こんばんは🌙 ゆっくりできてる？ ${userName}ちゃん`;
+
+  addMessage('hana', greeting);
+});
 
 // ===== カテゴリ画像設定 =====
 const imageCategories = {
