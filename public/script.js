@@ -4,6 +4,19 @@ const userInput = document.getElementById('user-input');
 const sendButton = document.getElementById('send-button');
 const bgmPlayer = document.getElementById('bgm-player');
 
+// XSS対策のescapeHtml関数
+function escapeHtml(str) {
+  return str.replace(/[&<>"]'/g, function (match) {
+    return ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    })[match];
+  });
+}
+
 // ===== BGM設定 =====
 const bgmFiles = [
   "/bgm/bgm_chill.mp3",
@@ -54,17 +67,19 @@ function playNextTrack() {
 }
 
 bgmPlayer.addEventListener('ended', playNextTrack);
+bgmPlayer.loop = false;
 
 // ユーザー操作トリガーの設定
-window.addEventListener('click', handleUserInteraction, { once: true });
-window.addEventListener('touchstart', handleUserInteraction, { once: true });
-
 function handleUserInteraction() {
+  console.log("✅ BGM 初期化イベント発火");
   if (!bgmInitialized) {
     initBGM();
     bgmInitialized = true;
   }
 }
+
+window.addEventListener('click', handleUserInteraction, { once: true });
+window.addEventListener('touchstart', handleUserInteraction, { once: true });
 
 // ========== チャット送信 ==========
 chatForm.addEventListener('submit', async (e) => {
@@ -72,9 +87,13 @@ chatForm.addEventListener('submit', async (e) => {
   const message = userInput.value.trim();
   if (message === '') return;
 
+  // ユーザーのメッセージを追加
   addMessage('user', message);
   userInput.value = '';
   sendButton.disabled = true;
+
+  // ローディングメッセージを追加
+  addMessage('bot', '…考え中…');
 
   try {
     const response = await fetch('/.netlify/functions/chat', {
@@ -86,6 +105,13 @@ chatForm.addEventListener('submit', async (e) => {
     if (!response.ok) throw new Error('サーバーエラー');
 
     const data = await response.json();
+    console.log("Botの応答データ:", data);
+
+    // 最後のbotメッセージ（考え中…）を削除
+    const lastBot = chatBox.querySelector('.chat-message.bot:last-child');
+    if (lastBot) chatBox.removeChild(lastBot);
+
+    // 本応答を追加
     addMessage('bot', data.reply, data.imageUrl);
   } catch (error) {
     addMessage('bot', '通信エラーが発生しました。もう一度試してください。');
@@ -99,18 +125,24 @@ function addMessage(sender, text, imageUrl = null) {
   const messageEl = document.createElement('div');
   messageEl.className = `chat-message ${sender}`;
 
+  // 改行とXSS対策済みHTML出力
+  const escapedText = escapeHtml(text || '[⚠️応答がありません]');
+  const formattedText = escapedText.replace(/\n/g, '<br>');
+
   const bubble = document.createElement('div');
   bubble.className = 'bubble';
-  bubble.textContent = text;
+  bubble.innerHTML = formattedText;
   messageEl.appendChild(bubble);
 
   if (imageUrl) {
     const img = document.createElement('img');
     img.src = imageUrl;
     img.alt = 'image';
+    img.className = 'message-image';
     messageEl.appendChild(img);
   }
 
   chatBox.appendChild(messageEl);
   chatBox.scrollTop = chatBox.scrollHeight;
 }
+
