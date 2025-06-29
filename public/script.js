@@ -1,5 +1,17 @@
-// APIキーの設定
-// env.jsで定義されているOPENAI_API_KEYを使用
+// DOM要素の取得
+const chatBox = document.getElementById('chat-box');
+const input = document.getElementById('user-input');
+const sendButton = document.getElementById('send-button');
+const bgmToggle = document.getElementById('bgm-toggle');
+const bgmPlayer = document.getElementById('bgm-player');
+
+// 送信ボタンの初期化と入力イベントリスナー
+sendButton.disabled = true;
+input.addEventListener('input', () => {
+  sendButton.disabled = input.value.trim() === '';
+});
+
+// APIキーはサーバー側（Netlify Functions）で管理します
 
 // 画像のカテゴリー別配列
 const imageCategories = {
@@ -50,12 +62,11 @@ function getRandomImage(category) {
 const userName = localStorage.getItem('userName') || prompt('あなたの名前を教えてください（例：ゆうき）');
 localStorage.setItem('userName', userName);
 
-// DOM要素の取得
-const input = document.getElementById('user-input');
-const sendButton = document.getElementById('send-button');
-const chatBox = document.getElementById('chat-box');
-const bgmPlayer = document.getElementById('bgm-player');
-const toggleButton = document.getElementById('bgm-toggle');
+// 送信ボタンの初期化と入力イベントリスナー
+sendButton.disabled = true;
+input.addEventListener('input', () => {
+  sendButton.disabled = input.value.trim() === '';
+});
 
 // BGM設定
 const bgmFiles = [
@@ -113,23 +124,26 @@ function playNextTrack() {
 bgmPlayer.addEventListener('ended', playNextTrack);
 
 // BGMの再生/停止を切り替える関数
-toggleButton.addEventListener('click', () => {
+bgmToggle.addEventListener('click', () => {
   if (bgmPlayer.paused) {
     bgmPlayer.play();
-    toggleButton.textContent = '🔇 BGM OFF';
+    bgmToggle.textContent = '🔇 BGM OFF';
   } else {
     bgmPlayer.pause();
-    toggleButton.textContent = '🔊 BGM ON';
+    bgmToggle.textContent = '🔊 BGM ON';
   }
 });
 
 // メッセージを追加する関数
 function addMessage(sender, text, imageSrc = null) {
+  // テキストがundefinedやnullの場合はデフォルトメッセージを表示
+  const message = text || '[⚠️応答がありません]';
+  
   const messageDiv = document.createElement('div');
   messageDiv.className = `chat-message ${sender === 'user' ? 'user' : 'bot'}`;
 
   messageDiv.innerHTML = `
-    <div class="bubble">${text}</div>
+    <div class="bubble">${message}</div>
     ${imageSrc ? `
       <img src="${imageSrc}" alt="${sender === 'user' ? 'あなたの画像' : '花ちゃんの画像'}" class="message-image">
     ` : ''}
@@ -149,21 +163,27 @@ const systemPrompt = `
 // AI呼び出し関数
 async function callHanaAI(message) {
   try {
-    const response = await fetch("/.netlify/functions/chat", {
-      method: "POST",
+    const response = await fetch('/.netlify/functions/chat', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json"
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        message: message
-      })
+      body: JSON.stringify({ message }),
     });
 
+    if (!response.ok) {
+      throw new Error(`APIエラー: ${response.statusText}`);
+    }
+
     const data = await response.json();
+    if (!data?.response) {
+      throw new Error('無効なレスポンス形式');
+    }
+
     return data.response;
   } catch (error) {
-    console.error('AI呼び出しエラー:', error);
-    return '申し訳ありません、AIの応答に失敗しました😢 もう一度お試しください！';
+    console.error('エラー:', error);
+    throw error;
   }
 }
 
@@ -234,37 +254,56 @@ function customHanaReply(userInput) {
 }
 
 async function handleSend() {
+  console.log('handleSend 開始');
+  
   // 送信処理中にボタンを無効化
   sendButton.disabled = true;
+  console.log('送信ボタン無効化');
+  
   const userInput = input.value.trim();
+  console.log('ユーザー入力:', userInput);
+  
   if (userInput === '') {
+    console.log('空のメッセージなので終了');
     sendButton.disabled = false;
     return;
   }
 
+  console.log('ユーザーのメッセージを追加');
   addMessage('user', userInput);
   input.value = '';
 
-  // 🔽 花っぽい固定応答を優先チェック
-  const hanaReply = customHanaReply(userInput);
-  if (hanaReply) {
-    if (typeof hanaReply === 'object' && hanaReply.text && hanaReply.image) {
-      addMessage('hana', hanaReply.text, hanaReply.image);
-    } else {
-      addMessage('hana', hanaReply);
-    }
-    sendButton.disabled = false;
-    return;
-  }
-
-  // 🔽 ここから下はGPT API連携
   try {
+    console.log('固定応答チェック開始');
+    // 🔽 花っぽい固定応答を優先チェック
+    const hanaReply = customHanaReply(userInput);
+    console.log('固定応答結果:', hanaReply);
+    
+    if (hanaReply) {
+      console.log('固定応答あり');
+      if (typeof hanaReply === 'object' && hanaReply.text && hanaReply.image) {
+        console.log('画像付き固定応答');
+        addMessage('hana', hanaReply.text, hanaReply.image);
+      } else {
+        console.log('テキストのみ固定応答');
+        addMessage('hana', hanaReply);
+      }
+      console.log('固定応答完了');
+      sendButton.disabled = false;
+      return;
+    }
+
+    console.log('GPT API呼び出し開始');
+    // 🔽 ここから下はGPT API連携
     const aiResponse = await callHanaAI(userInput);
+    console.log('AI応答:', aiResponse);
     addMessage('hana', aiResponse);
   } catch (error) {
-    console.error('AI応答エラー:', error);
+    console.error('エラー発生:', error);
+    console.error('エラー詳細:', error.message);
     addMessage('hana', '申し訳ありません、AIの応答に失敗しました😢 もう一度お試しください！');
   } finally {
+    console.log('処理完了');
     sendButton.disabled = false;
   }
 }
@@ -316,3 +355,4 @@ else greeting = `こんばんは🌙 ゆっくりできてる？ ${userName}ち�
 
   addMessage('hana', greeting);
 });
+
