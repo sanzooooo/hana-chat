@@ -3,65 +3,68 @@ const chatForm = document.getElementById('chat-form');
 const userInput = document.getElementById('user-input');
 const sendButton = document.getElementById('send-button');
 const bgmPlayer = document.getElementById('bgm-player');
-const bgmToggle = document.getElementById('bgm-toggle');
 
-// ========== BGM関連 ==========
-const bgmList = [
-  'bgm/bgm_chill.mp3',
-  'bgm/bgm_future.mp3',
-  'bgm/bgm_happy.mp3',
-  'bgm/bgm_hero.mp3',
-  'bgm/bgm_hitroad.mp3',
-  'bgm/bgm_nomonomo.mp3',
-  'bgm/bgm_notdone.mp3',
-  'bgm/bgm_tiara.mp3',
+// ===== BGM設定 =====
+const bgmFiles = [
+  "bgm/bgm_chill.mp3",
+  "bgm/bgm_future.mp3",
+  "bgm/bgm_happy.mp3",
+  "bgm/bgm_hero.mp3",
+  "bgm/bgm_hitroad.mp3",
+  "bgm/bgm_nomonomo.mp3",
+  "bgm/bgm_notdone.mp3",
+  "bgm/bgm_tiara.mp3"
 ];
 
-let isBgmPlaying = false;
+let playlist = [];
 let currentIndex = 0;
-let shuffledBgm = [];
+let bgmInitialized = false;
 
-function shuffleBgmList() {
-  const array = [...bgmList];
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
+// シャッフル関数（同じ曲が連続しないよう制御）
+function shuffleNoRepeat(array, previous) {
+  let shuffled = array.slice();
+  do {
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+  } while (shuffled[0] === previous); // 先頭が前回と同じなら再シャッフル
+  return shuffled;
 }
 
-function playNextBgm() {
-  if (shuffledBgm.length === 0) {
-    shuffledBgm = shuffleBgmList();
-  }
-
-  const track = shuffledBgm[currentIndex % shuffledBgm.length];
-  bgmPlayer.src = track;
+// 再生初期化
+function initBGM() {
+  playlist = shuffleNoRepeat(bgmFiles, null);
+  currentIndex = 0;
+  bgmPlayer.src = playlist[currentIndex];
   bgmPlayer.volume = 0.5;
-  bgmPlayer.play().catch(e => console.warn('BGM再生エラー:', e));
-  currentIndex++;
+  bgmPlayer.play().catch(e => console.warn('自動再生ブロック:', e));
 }
 
-bgmPlayer.addEventListener('ended', playNextBgm);
-
-bgmToggle.addEventListener('click', () => {
-  if (isBgmPlaying) {
-    bgmPlayer.pause();
-    isBgmPlaying = false;
-    bgmToggle.textContent = '🔊 BGM ON';
-  } else {
-    shuffledBgm = shuffleBgmList();
+// 次の曲へ（終わったら自動で次へ）
+function playNextTrack() {
+  const lastTrack = playlist[currentIndex];
+  currentIndex++;
+  if (currentIndex >= playlist.length) {
+    playlist = shuffleNoRepeat(bgmFiles, lastTrack);
     currentIndex = 0;
-    playNextBgm();
-    isBgmPlaying = true;
-    bgmToggle.textContent = '🔇 BGM OFF';
   }
-});
+  bgmPlayer.src = playlist[currentIndex];
+  bgmPlayer.play();
+}
 
-// 初回ロード時に自動ON
-window.addEventListener('DOMContentLoaded', () => {
-  bgmToggle.click(); // 自動でONに切り替える
-});
+bgmPlayer.addEventListener('ended', playNextTrack);
+
+// ユーザー操作トリガーの設定
+window.addEventListener('click', handleUserInteraction, { once: true });
+window.addEventListener('touchstart', handleUserInteraction, { once: true });
+
+function handleUserInteraction() {
+  if (!bgmInitialized) {
+    initBGM();
+    bgmInitialized = true;
+  }
+}
 
 // ========== チャット送信 ==========
 chatForm.addEventListener('submit', async (e) => {
