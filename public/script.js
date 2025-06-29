@@ -41,31 +41,48 @@ function initBGM() {
   bgmPlayer.src = shuffledPlaylist[currentIndex];
   bgmPlayer.volume = 0.5;
   bgmPlayer.loop = false;
-  bgmPlayer.play();
-  isPlaying = true;
-  bgmToggle.textContent = '🔇 BGM OFF';
+
+  const playPromise = bgmPlayer.play();
+  if (playPromise !== undefined) {
+    playPromise
+      .then(() => {
+        isPlaying = true;
+        bgmToggle.textContent = '🔇 BGM OFF';
+      })
+      .catch((error) => {
+        console.warn('自動再生ブロック：ユーザー操作が必要です');
+        bgmToggle.textContent = '🔊 BGM ON';
+        isPlaying = false;
+      });
+  }
 }
 
 function playNextTrack() {
-  currentIndex = (currentIndex + 1) % shuffledPlaylist.length;
+  currentIndex++;
+  if (currentIndex >= shuffledPlaylist.length) {
+    shuffledPlaylist = shuffle(bgmFiles);
+    currentIndex = 0;
+  }
   bgmPlayer.src = shuffledPlaylist[currentIndex];
   bgmPlayer.play();
 }
 
 bgmPlayer.addEventListener('ended', playNextTrack);
+
 bgmToggle.addEventListener('click', () => {
   if (bgmPlayer.paused) {
     bgmPlayer.play();
     bgmToggle.textContent = '🔇 BGM OFF';
+    isPlaying = true;
   } else {
     bgmPlayer.pause();
     bgmToggle.textContent = '🔊 BGM ON';
+    isPlaying = false;
   }
 });
 
 // ===== 初期化 =====
 window.addEventListener('load', () => {
-  bgmToggle.textContent = '🔊 BGM ON'; // 初期状態を明確に
   initBGM();
 
   const hour = new Date().getHours();
@@ -121,65 +138,46 @@ input.addEventListener('compositionend', () => { isComposing = false; });
 
 // ===== チャット送信ロジック =====
 async function handleSend() {
-  console.log('送信開始:', input.value);
-  
   sendButton.disabled = true;
   const userInput = input.value.trim();
   if (!userInput) return;
 
-  console.log('ユーザー入力:', userInput);
-  
   addMessage('user', userInput);
   input.value = '';
 
   const hanaReply = customHanaReply(userInput);
   if (hanaReply) {
-    console.log('固定応答:', hanaReply);
     addMessage('hana', hanaReply.text, hanaReply.image);
     sendButton.disabled = false;
     return;
   }
 
   try {
-    console.log('API呼び出し開始');
     const response = await fetch('/.netlify/functions/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: userInput })
     });
-    
-    console.log('レスポンスステータス:', response.status);
-    console.log('レスポンスヘッダー:', response.headers);
-    
+
     if (!response.ok) {
       throw new Error(`HTTPエラー: ${response.status} ${response.statusText}`);
     }
-    
+
     const data = await response.json();
-    console.log('API応答:', data);
-    
-    // エラーレスポンスの場合
+
     if (data.error) {
-      console.error('APIエラー:', data.error);
       throw new Error(data.error);
     }
-    
-    // 成功レスポンスの場合
+
     if (data.response) {
       addMessage('hana', data.response);
     } else {
-      console.warn('無効なレスポンス形式:', data);
       addMessage('hana', '応答が取得できませんでした');
     }
   } catch (error) {
-    console.error('エラー詳細:', {
-      message: error.message,
-      name: error.name,
-      stack: error.stack
-    });
+    console.error('通信エラー:', error);
     addMessage('hana', '通信エラーが発生しました。もう一度試してみてください。');
   } finally {
-    console.log('処理完了');
     sendButton.disabled = false;
   }
 }
@@ -204,8 +202,9 @@ sendButton.addEventListener('click', (e) => {
   handleSend();
 });
 
-// フォームのイベントリスナーを設定
-chatForm.addEventListener('submit', (e) => {
-  e.preventDefault();
-  handleSend();
-});
+if (chatForm) {
+  chatForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    handleSend();
+  });
+}
