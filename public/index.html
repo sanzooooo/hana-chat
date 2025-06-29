@@ -9,10 +9,10 @@
 <body>
   <div class="chat-container">
     <div id="chat-box" class="chat-box"></div>
-    <div class="input-area">
+    <form id="chat-form" class="input-area">
       <input type="text" id="user-input" placeholder="メッセージを入力…" autocomplete="off" />
-      <button id="send-button">送信</button>
-    </div>
+      <button type="submit" id="send-button">送信</button>
+    </form>
   </div>
   <button id="bgm-toggle" class="bgm-toggle">🔊 BGM ON</button>
   <audio id="bgm-player" preload="metadata"></audio>
@@ -20,3 +20,4 @@
   <script src="script.js"></script>
 </body>
 </html>
+
