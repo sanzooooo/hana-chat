@@ -344,39 +344,15 @@ async function handleSend() {
   }
 }
 
-// イベントリスナーの設定
-// 送信ボタンクリック
-sendButton.addEventListener('click', async (event) => {
-  event.preventDefault(); // デフォルトのフォーム送信を防ぐ
-  try {
-    await handleSend();
-    bgmPlayer.play();
-  } catch (error) {
-    console.error('メッセージ送信エラー:', error);
-    // エラー時も送信ボタンを有効化
-    sendButton.disabled = false;
-  }
-});
-
-// エンターキー押下
-input.addEventListener('keypress', async (event) => {
-  if (event.key === 'Enter' && !event.shiftKey) {
-    event.preventDefault(); // デフォルトのエンターキー動作を防ぐ
-    try {
-      await handleSend();
-      bgmPlayer.play();
-    } catch (error) {
-      console.error('メッセージ送信エラー:', error);
-      sendButton.disabled = false;
-    }
-  }
-});
-
-// フォーム送信
-const form = document.querySelector('form');
-if (form) {
-  form.addEventListener('submit', async (event) => {
+// フォームのイベントリスナーを追加
+const chatForm = document.getElementById('chat-form');
+if (chatForm) {
+  chatForm.addEventListener('submit', async (event) => {
     event.preventDefault(); // デフォルトのフォーム送信を防ぐ
+    
+    // ユーザー操作からの非同期実行を保証
+    await new Promise(resolve => setTimeout(resolve, 0));
+    
     try {
       await handleSend();
       bgmPlayer.play();
@@ -386,6 +362,40 @@ if (form) {
     }
   });
 }
+
+// エンターキー押下
+input.addEventListener('keypress', async (event) => {
+  if (event.key === 'Enter' && !event.shiftKey) {
+    event.preventDefault(); // デフォルトのエンターキー動作を防ぐ
+    
+    // ユーザー操作からの非同期実行を保証
+    await new Promise(resolve => setTimeout(resolve, 0));
+    
+    try {
+      await handleSend();
+      bgmPlayer.play();
+    } catch (error) {
+      console.error('メッセージ送信エラー:', error);
+      sendButton.disabled = false;
+    }
+  }
+});
+
+// 送信ボタンクリック
+sendButton.addEventListener('click', async (event) => {
+  event.preventDefault(); // デフォルトのフォーム送信を防ぐ
+  
+  // ユーザー操作からの非同期実行を保証
+  await new Promise(resolve => setTimeout(resolve, 0));
+  
+  try {
+    await handleSend();
+    bgmPlayer.play();
+  } catch (error) {
+    console.error('メッセージ送信エラー:', error);
+    sendButton.disabled = false;
+  }
+});
 
 // 日本語入力中の判定
 let isComposing = false;
@@ -431,4 +441,5 @@ else greeting = `こんばんは🌙 ゆっくりできてる？ ${userName}ち�
 
   addMessage('hana', greeting);
 });
+
 
