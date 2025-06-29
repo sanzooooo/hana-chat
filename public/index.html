@@ -7,17 +7,18 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="chat-container">
-    <div id="chat-box" class="chat-box"></div>
-    <form id="chat-form" class="input-area">
-      <input type="text" id="user-input" placeholder="メッセージを入力…" autocomplete="off" />
-      <button type="submit" id="send-button">送信</button>
+  <main>
+    <button id="bgm-toggle" class="bgm-toggle">🔇 BGM OFF</button>
+    <div id="chat-box"></div>
+    
+    <form id="chat-form" class="input-container">
+      <input type="text" id="user-input" placeholder="メッセージを入力...">
+      <button id="send-button" type="submit">送信</button>
     </form>
-  </div>
-  <button id="bgm-toggle" class="bgm-toggle">🔊 BGM ON</button>
+  </main>
+
   <audio id="bgm-player" preload="metadata"></audio>
   <script src="/env.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
-
