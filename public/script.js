@@ -1,107 +1,16 @@
-// DOM要素の取得
+// ===== DOM要素の取得 =====
 const chatBox = document.getElementById('chat-box');
 const input = document.getElementById('user-input');
 const sendButton = document.getElementById('send-button');
 const bgmToggle = document.getElementById('bgm-toggle');
 const bgmPlayer = document.getElementById('bgm-player');
+const chatForm = document.getElementById('chat-form');
 
-// BGMの設定
-const bgmFiles = [
-  'bgm/1.mp3',
-  'bgm/2.mp3',
-  'bgm/3.mp3',
-  'bgm/4.mp3',
-  'bgm/5.mp3'
-];
-
-let shuffledPlaylist = [];
-let currentIndex = 0;
-let isPlaying = false;
-
-// ページ読み込み時にBGMを初期化
-window.addEventListener('load', () => {
-  initBGM();
-});
-
-// 入力フォーカス時のスクロール調整
-input.addEventListener('focus', () => {
-  setTimeout(() => {
-    input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }, 300); // iOSキーボードのアニメーション待ち
-});
-
-// チャットが自動で下までスクロールするようにする
-function scrollToBottom() {
-  chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-// メッセージ送信後や新しいメッセージが追加されたときに呼び出す
-chatBox.addEventListener('DOMNodeInserted', scrollToBottom);
-
-// 送信ボタンの初期化と入力イベントリスナー
-sendButton.disabled = true;
-input.addEventListener('input', () => {
-  sendButton.disabled = input.value.trim() === '';
-});
-
-// APIキーはサーバー側（Netlify Functions）で管理します
-
-// 画像のカテゴリー別配列
-const imageCategories = {
-  ohayou: [
-    'img/img_ohayou1.png',
-    'img/img_ohayou2.png',
-    'img/img_ohayou3.png',
-    'img/img_ohayou4.png',
-    'img/img_ohayou5.png',
-    'img/img_ohayou6.png',
-    'img/img_ohayou7.png',
-    'img/img_ohayou8.png'
-  ],
-  otsukare: [
-    'img/img_otsukare1.png',
-    'img/img_otsukare2.png',
-    'img/img_otsukare3.png',
-    'img/img_otsukare4.png',
-    'img/img_otsukare5.png',
-    'img/img_otsukare6.png',
-    'img/img_otsukare7.png',
-    'img/img_otsukare8.png',
-    'img/img_otsukare9.png'
-  ],
-  random: [
-    'img/img_random1.png',
-    'img/img_random2.png',
-    'img/img_random3.png',
-    'img/img_random4.png',
-    'img/img_random5.png',
-    'img/img_random6.png',
-    'img/img_random7.png',
-    'img/img_random8.png',
-    'img/img_random9.png',
-    'img/img_random10.png'
-  ]
-};
-
-// ランダムな画像を取得
-function getRandomImage(category) {
-  if (!imageCategories[category]) {
-    return imageCategories.random[Math.floor(Math.random() * imageCategories.random.length)];
-  }
-  return imageCategories[category][Math.floor(Math.random() * imageCategories[category].length)];
-}
-
-// ユーザー名の設定
+// ===== ユーザー名の保存 =====
 const userName = localStorage.getItem('userName') || prompt('あなたの名前を教えてください（例：ゆうき）');
 localStorage.setItem('userName', userName);
 
-// 送信ボタンの初期化と入力イベントリスナー
-sendButton.disabled = true;
-input.addEventListener('input', () => {
-  sendButton.disabled = input.value.trim() === '';
-});
-
-// BGM設定
+// ===== BGM設定 =====
 const bgmFiles = [
   "bgm/bgm_nomonomo.mp3",
   "bgm/bgm_hero.mp3",
@@ -117,7 +26,6 @@ let shuffledPlaylist = [];
 let currentIndex = 0;
 let isPlaying = false;
 
-// シャッフル関数
 function shuffle(array) {
   const result = array.slice();
   for (let i = result.length - 1; i > 0; i--) {
@@ -127,39 +35,24 @@ function shuffle(array) {
   return result;
 }
 
-// BGMの初期化
 function initBGM() {
   shuffledPlaylist = shuffle(bgmFiles);
-  bgmPlayer.src = shuffledPlaylist[0];
+  currentIndex = 0;
+  bgmPlayer.src = shuffledPlaylist[currentIndex];
   bgmPlayer.volume = 0.5;
-  bgmPlayer.autoplay = true;
   bgmPlayer.loop = false;
-  bgmPlayer.preload = 'metadata';
   bgmPlayer.play();
   isPlaying = true;
   bgmToggle.textContent = '🔇 BGM OFF';
 }
 
-// BGMの再生
-function startBGM() {
-  if (!isPlaying) {
-    bgmPlayer.src = shuffledPlaylist[currentIndex];
-    bgmPlayer.play();
-    isPlaying = true;
-  }
-}
-
-// 次の曲を再生
 function playNextTrack() {
   currentIndex = (currentIndex + 1) % shuffledPlaylist.length;
   bgmPlayer.src = shuffledPlaylist[currentIndex];
   bgmPlayer.play();
 }
 
-// ボリューム調整とBGMの再生/停止
 bgmPlayer.addEventListener('ended', playNextTrack);
-
-// BGMの再生/停止を切り替える関数
 bgmToggle.addEventListener('click', () => {
   if (bgmPlayer.paused) {
     bgmPlayer.play();
@@ -170,276 +63,149 @@ bgmToggle.addEventListener('click', () => {
   }
 });
 
-// メッセージを追加する関数
+// ===== 初期化 =====
+window.addEventListener('load', () => {
+  bgmToggle.textContent = '🔊 BGM ON'; // 初期状態を明確に
+  initBGM();
+
+  const hour = new Date().getHours();
+  let greeting = '';
+  if (hour < 10) greeting = `おはよう☀️ 今日もがんばろっ♪ ${userName}ちゃん`;
+  else if (hour < 18) greeting = `こんにちは🌼 今日も楽しくいこうね！ ${userName}ちゃん`;
+  else greeting = `こんばんは🌙 ゆっくりできてる？ ${userName}ちゃん`;
+
+  addMessage('hana', greeting);
+});
+
+// ===== メッセージ表示関数 =====
 function addMessage(sender, text, imageSrc = null) {
-  // テキストがundefinedやnullの場合はデフォルトメッセージを表示
   const message = text || '[⚠️応答がありません]';
-  
   const messageDiv = document.createElement('div');
   messageDiv.className = `chat-message ${sender === 'user' ? 'user' : 'bot'}`;
-
   messageDiv.innerHTML = `
     <div class="bubble">${message}</div>
-    ${imageSrc ? `
-      <img src="${imageSrc}" alt="${sender === 'user' ? 'あなたの画像' : '花ちゃんの画像'}" class="message-image">
-    ` : ''}
+    ${imageSrc ? `<img src="${imageSrc}" class="message-image">` : ''}
   `;
-
   chatBox.appendChild(messageDiv);
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// システムプロンプト
-const systemPrompt = `
-あなたは咲々木 花（ささき はな）です。新潟を拠点に活動しているAIアイドルで、明るく前向き、好奇心旺盛。
-親しみやすく、ファンとの距離感を大事にし、語尾に「〜ね」や「だよ〜」などをつける傾向があります。
-「日本酒」「晩酌」「新潟」などの話題が好きです。
-`;
+// ===== カテゴリ画像設定 =====
+const imageCategories = {
+  ohayou: ['img/img_ohayou1.png', 'img/img_ohayou2.png'],
+  otsukare: ['img/img_otsukare1.png', 'img/img_otsukare2.png'],
+  random: ['img/img_random1.png', 'img/img_random2.png']
+};
 
-// AI呼び出し関数
-async function callHanaAI(message) {
-  try {
-    const response = await fetch('/.netlify/functions/chat', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ message }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`APIエラー: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    if (!data?.response) {
-      throw new Error('無効なレスポンス形式');
-    }
-
-    return data.response;
-  } catch (error) {
-    console.error('エラー:', error);
-    throw error;
-  }
+function getRandomImage(category) {
+  const list = imageCategories[category] || imageCategories.random;
+  return list[Math.floor(Math.random() * list.length)];
 }
 
-// 咲々木 花のロジック
-function getHanaGreeting() {
-  const hour = new Date().getHours();
-  if (hour < 11) return "おはようございます☀️ 今日も元気にいきましょー！";
-  if (hour < 17) return "こんにちは〜🌞 午後もがんばろっ！";
-  return "こんばんは🌙 そろそろ晩酌かな？🍶";
-}
+// ===== 入力・送信管理 =====
+sendButton.disabled = true;
+input.addEventListener('input', () => {
+  sendButton.disabled = input.value.trim() === '';
+});
 
-function customHanaReply(userInput) {
-  if (userInput.includes("おはよう")) {
-    return {
-      text: "おはよ〜☀️ 今日も一日よろしくねっ",
-      image: getRandomImage('ohayou')
-    };
+input.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey && !isComposing) {
+    e.preventDefault();
+    handleSend();
   }
-  if (userInput.includes("おつかれ") || userInput.includes("おつかれさま")) {
-    return {
-      text: "おつかれさま〜！ゆっくり休んでね〜✨",
-      image: getRandomImage('otsukare')
-    };
-  }
-  if (userInput.includes("花")) {
-    return {
-      text: "呼んだ？花だよ〜🌸 咲々木 花っていいますっ♪",
-      image: getRandomImage('random')
-    };
-  }
-  if (userInput.includes("滝雲しおり")) {
-    return {
-      text: "しおりちゃんは花の相棒で、ギターが得意なんだ〜🎸 ちょっと不器用だけど、ほんとはすごく優しいの！",
-      image: getRandomImage('random')
-    };
-  }
-  if (userInput.includes("おばあちゃん")) {
-    return {
-      text: "花がアイドルを始めたのはね、おばあちゃんの影響なの。日本酒が好きなのも、おばあちゃんゆずりなんだ🍶",
-      image: getRandomImage('random')
-    };
-  }
-  if (userInput.includes("がたがた")) {
-    return {
-      text: "がたがたって曲、聞いたことある？ちょっと恥ずかしいけど、花のはじまりの歌なんだ〜💫\nhttps://linkco.re/hQUrA83C",
-      image: getRandomImage('random')
-    };
-  }
-  if (userInput.includes("花のままで")) {
-    return {
-      text: "『花のまんで』はね、自分らしくいていいんだよって伝えたい曲なんだ🌼\nhttps://linkco.re/hQUrA83C",
-      image: "https://placekitten.com/200/200"
-    };
-  }
-  if (userInput.includes("きらきらコーヒー")) {
-    return {
-      text: "きらきらコーヒー☕✨、お昼のカフェで聴いてほしいな〜\nhttps://linkco.re/hQUrA83C",
-      image: "https://placekitten.com/200/200"
-    };
-  }
-  if (userInput.includes("咲々木") || userInput.includes("ささき") || userInput.includes("さきさき")) {
-    return {
-      text: "咲々木 花（ささき はな）って言いますっ🌸 よろしくねっ！",
-      image: "https://placekitten.com/200/200"
-    };
-  }
-  return null; // それ以外はGPTに聞く
-}
+});
 
+let isComposing = false;
+input.addEventListener('compositionstart', () => { isComposing = true; });
+input.addEventListener('compositionend', () => { isComposing = false; });
+
+// ===== チャット送信ロジック =====
 async function handleSend() {
-  console.log('handleSend 開始');
+  console.log('送信開始:', input.value);
   
-  // 送信処理中にボタンを無効化
   sendButton.disabled = true;
-  console.log('送信ボタン無効化');
-  
   const userInput = input.value.trim();
+  if (!userInput) return;
+
   console.log('ユーザー入力:', userInput);
   
-  if (userInput === '') {
-    console.log('空のメッセージなので終了');
+  addMessage('user', userInput);
+  input.value = '';
+
+  const hanaReply = customHanaReply(userInput);
+  if (hanaReply) {
+    console.log('固定応答:', hanaReply);
+    addMessage('hana', hanaReply.text, hanaReply.image);
     sendButton.disabled = false;
     return;
   }
 
-  console.log('ユーザーのメッセージを追加');
-  addMessage('user', userInput);
-  input.value = '';
-
   try {
-    console.log('固定応答チェック開始');
-    // 🔽 花っぽい固定応答を優先チェック
-    const hanaReply = customHanaReply(userInput);
-    console.log('固定応答結果:', hanaReply);
+    console.log('API呼び出し開始');
+    const response = await fetch('/.netlify/functions/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: userInput })
+    });
     
-    if (hanaReply) {
-      console.log('固定応答あり');
-      if (typeof hanaReply === 'object' && hanaReply.text && hanaReply.image) {
-        console.log('画像付き固定応答');
-        addMessage('hana', hanaReply.text, hanaReply.image);
-      } else {
-        console.log('テキストのみ固定応答');
-        addMessage('hana', hanaReply);
-      }
-      console.log('固定応答完了');
-      sendButton.disabled = false;
-      return;
+    console.log('レスポンスステータス:', response.status);
+    console.log('レスポンスヘッダー:', response.headers);
+    
+    if (!response.ok) {
+      throw new Error(`HTTPエラー: ${response.status} ${response.statusText}`);
     }
-
-    console.log('GPT API呼び出し開始');
-    // 🔽 ここから下はGPT API連携
-    const aiResponse = await callHanaAI(userInput);
-    console.log('AI応答:', aiResponse);
-    addMessage('hana', aiResponse);
+    
+    const data = await response.json();
+    console.log('API応答:', data);
+    
+    // エラーレスポンスの場合
+    if (data.error) {
+      console.error('APIエラー:', data.error);
+      throw new Error(data.error);
+    }
+    
+    // 成功レスポンスの場合
+    if (data.response) {
+      addMessage('hana', data.response);
+    } else {
+      console.warn('無効なレスポンス形式:', data);
+      addMessage('hana', '応答が取得できませんでした');
+    }
   } catch (error) {
-    console.error('エラー発生:', error);
-    console.error('エラー詳細:', error.message);
-    addMessage('hana', '申し訳ありません、AIの応答に失敗しました😢 もう一度お試しください！');
+    console.error('エラー詳細:', {
+      message: error.message,
+      name: error.name,
+      stack: error.stack
+    });
+    addMessage('hana', '通信エラーが発生しました。もう一度試してみてください。');
   } finally {
     console.log('処理完了');
     sendButton.disabled = false;
   }
 }
 
-// フォームのイベントリスナーを追加
-const chatForm = document.getElementById('chat-form');
-if (chatForm) {
-  chatForm.addEventListener('submit', async (event) => {
-    event.preventDefault(); // デフォルトのフォーム送信を防ぐ
-    
-    // ユーザー操作からの非同期実行を保証
-    await new Promise(resolve => setTimeout(resolve, 0));
-    
-    try {
-      await handleSend();
-      bgmPlayer.play();
-    } catch (error) {
-      console.error('メッセージ送信エラー:', error);
-      sendButton.disabled = false;
-    }
-  });
+// ===== 固定応答ロジック（花ちゃんらしさ） =====
+function customHanaReply(input) {
+  if (input.includes("おはよう")) {
+    return { text: "おはよ〜☀️ 今日もよろしくね〜", image: getRandomImage('ohayou') };
+  }
+  if (input.includes("おつかれ")) {
+    return { text: "おつかれさまっ！ゆっくり休んでね〜", image: getRandomImage('otsukare') };
+  }
+  if (input.includes("花")) {
+    return { text: "呼んだ？咲々木 花だよ〜🌸", image: getRandomImage('random') };
+  }
+  return null;
 }
 
-// エンターキー押下
-input.addEventListener('keypress', async (event) => {
-  if (event.key === 'Enter' && !event.shiftKey) {
-    event.preventDefault(); // デフォルトのエンターキー動作を防ぐ
-    
-    // ユーザー操作からの非同期実行を保証
-    await new Promise(resolve => setTimeout(resolve, 0));
-    
-    try {
-      await handleSend();
-      bgmPlayer.play();
-    } catch (error) {
-      console.error('メッセージ送信エラー:', error);
-      sendButton.disabled = false;
-    }
-  }
+// ===== イベント =====
+sendButton.addEventListener('click', (e) => {
+  e.preventDefault();
+  handleSend();
 });
 
-// 送信ボタンクリック
-sendButton.addEventListener('click', async (event) => {
-  event.preventDefault(); // デフォルトのフォーム送信を防ぐ
-  
-  // ユーザー操作からの非同期実行を保証
-  await new Promise(resolve => setTimeout(resolve, 0));
-  
-  try {
-    await handleSend();
-    bgmPlayer.play();
-  } catch (error) {
-    console.error('メッセージ送信エラー:', error);
-    sendButton.disabled = false;
-  }
+// フォームのイベントリスナーを設定
+chatForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  handleSend();
 });
-
-// 日本語入力中の判定
-let isComposing = false;
-input.addEventListener('compositionstart', () => {
-  isComposing = true;
-});
-input.addEventListener('compositionend', () => {
-  isComposing = false;
-});
-
-// Enterキーの2回押し検出
-let enterPressedOnce = false;
-let enterTimer = null;
-
-input.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') {
-    if (e.shiftKey) {
-      // Shift + Enter は改行
-      return;
-    }
-
-    e.preventDefault(); // 通常の送信を無効化
-
-    if (isComposing) {
-      // 変換中は送信しない
-      return;
-    }
-
-    // 変換確定後のEnterで送信
-    if (!isComposing) {
-      handleSend();
-    }
-  }
-});
-
-// Add greeting message based on time of day
-window.addEventListener('load', () => {
-  const hour = new Date().getHours();
-  let greeting = '';
-if (hour < 10) greeting = `おはよう☀️ 今日もがんばろっ♪ ${userName}ちゃん`;
-else if (hour < 18) greeting = `こんにちは🌼 今日も楽しくいこうね！ ${userName}ちゃん`;
-else greeting = `こんばんは🌙 ゆっくりできてる？ ${userName}ちゃん`;
-
-  addMessage('hana', greeting);
-});
-
-
