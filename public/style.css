@@ -1,217 +1,147 @@
+/* ===== 共通スタイル ===== */
 body {
-    margin: 0;
-    font-family: "Arial", sans-serif;
-    background-color: #f5f5f5;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+  margin: 0;
+  font-family: "Arial", sans-serif;
+  background-color: #f5f5f5;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-.chat-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    max-width: 600px;
-    margin: 0 auto;
-    height: 100vh;
-    overflow: hidden;
-    position: relative;
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.chat-box {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+/* ===== チャットボックス ===== */
+#chat-box {
+  width: 100%;
+  max-width: 600px;
+  height: 70vh;
+  overflow-y: auto;
+  padding: 10px;
+  box-sizing: border-box;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  margin-bottom: 80px;
+  scroll-behavior: smooth;
 }
 
+/* ===== チャットメッセージ ===== */
 .chat-message {
-    display: flex;
-    margin: 10px;
-    max-width: 80%;
-}
-
-/* ユーザーの吹き出し（右寄せ・ピンク） */
-.chat-message.user {
-    justify-content: flex-end;
-}
-
-.chat-message.bot {
-    align-items: flex-start;
+  display: flex;
+  align-items: flex-start;
+  margin: 5px 0;
+  width: 100%;
 }
 
 .bubble {
-    display: inline-block;
-    background-color: #ffe6f3;
-    padding: 10px 14px;
-    border-radius: 16px;
-    max-width: 60%;
-    font-size: 16px;
-    line-height: 1.5;
-    word-break: break-word;
-    margin: 0 10px;
+  max-width: 80%;
+  padding: 12px 16px;
+  border-radius: 20px;
+  margin: 0 10px;
+  display: inline-block;
+  word-wrap: break-word;
+  line-height: 1.4;
 }
 
 .chat-message.user .bubble {
-    background-color: #ff69b4;
-    color: white;
+  background-color: #ff69b4;
+  color: white;
+  margin-left: auto;
+  border-bottom-right-radius: 5px;
+}
+
+.chat-message.bot .bubble {
+  background-color: #e0e0e0;
+  color: #333;
+  margin-right: auto;
+  border-bottom-left-radius: 5px;
 }
 
 .chat-message img {
-    margin-top: 8px;
-    max-width: 200px;
-    border-radius: 16px;
-    display: block;
-    margin: 0 auto;
+  margin-top: 8px;
+  max-width: 200px;
+  border-radius: 16px;
+  display: block;
+  margin: 0 auto;
 }
 
-.input-area {
-    position: fixed;
-    bottom: env(safe-area-inset-bottom, 0);
-    left: 0;
-    right: 0;
-    max-width: 600px;
-    margin: 0 auto;
-    background-color: #fff;
-    border-top: 1px solid #ddd;
-    display: flex;
-    padding: 12px 16px;
-    padding-bottom: calc(env(safe-area-inset-bottom, 0) + 8px);
-    z-index: 1000;
+/* ===== 入力エリア ===== */
+.input-container {
+  position: fixed;
+  bottom: env(safe-area-inset-bottom, 0);
+  left: 0;
+  right: 0;
+  max-width: 600px;
+  margin: 0 auto;
+  background-color: #fff;
+  border-top: 1px solid #ddd;
+  display: flex;
+  padding: 12px 16px;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0) + 8px);
+  z-index: 1000;
+  box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
 }
 
 #user-input {
-    flex: 1;
-    padding: 10px;
-    font-size: 16px;
-    border-radius: 20px;
-    border: 1px solid #ccc;
-    outline: none;
-    resize: none;
+  flex: 1;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  outline: none;
+  resize: none;
 }
 
+/* ===== 送信ボタン ===== */
 #send-button {
-    padding: 10px 20px;
-    background-color: #ff69b4;
-    color: #fff;
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    font-size: 16px;
+  padding: 10px 20px;
+  background-color: #ff69b4;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 16px;
+  margin: 0 10px;
 }
 
 #send-button:hover {
-    background-color: #ff45a1;
+  background-color: #ff45a1;
 }
 
+/* ===== BGMボタン ===== */
 .bgm-toggle {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 20px;
-    padding: 8px 16px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.2s;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
 .bgm-toggle:hover {
-    background-color: #f5f5f5;
-    transform: scale(1.05);
-}
+  background-color: #f5f5f5;
+  transform: scale(1.05);
 }
 
 /* スクロール時のアニメーション */
 .chat-box {
   scroll-behavior: smooth;
+  height: 80vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 10px;
+  max-width: 600px;
+  margin: 0 auto;
 }
-  
-  .chat-container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .chat-box {
-    height: 80vh;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    padding: 10px;
-  }
-  
-  .message {
-    display: flex;
-    flex-direction: column;
-    margin: 10px 0;
-  }
-  
-  .message.user {
-    align-items: flex-end;
-  }
-  
-  .message.hana {
-    align-items: flex-start;
-  }
-  
-  .bubble {
-    max-width: 70%;
-    padding: 10px 14px;
-    border-radius: 16px;
-    background-color: #ffffff;
-    box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
-  }
-  
-  .message.user .bubble {
-    background-color: #d6f5c9;
-  }
-  
-  .chat-image {
-    max-width: 200px;
-    height: auto;
-    border-radius: 10px;
-    margin-top: 5px;
-    object-fit: contain;
-  }
-  
-  .input-area {
-    display: flex;
-    margin-top: 10px;
-  }
-  
-  #user-input {
-    flex-grow: 1;
-    padding: 10px;
-    font-size: 16px;
-    border-radius: 20px;
-    border: 1px solid #ccc;
-    outline: none;
-    resize: none;
-  }
-  
-  #send-button {
-    background-color: #28c03c;
-    color: white;
-    border: none;
-    border-radius: 20px;
-    padding: 0 20px;
-    font-size: 16px;
-    margin-left: 10px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  #send-button:hover {
-    background-color: #1a9a2c;
-  }
-  
