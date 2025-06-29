@@ -5,6 +5,31 @@ const sendButton = document.getElementById('send-button');
 const bgmToggle = document.getElementById('bgm-toggle');
 const bgmPlayer = document.getElementById('bgm-player');
 
+// BGMの設定
+const bgmFiles = [
+  'bgm/1.mp3',
+  'bgm/2.mp3',
+  'bgm/3.mp3',
+  'bgm/4.mp3',
+  'bgm/5.mp3'
+];
+
+let shuffledPlaylist = [];
+let currentIndex = 0;
+let isPlaying = false;
+
+// ページ読み込み時にBGMを初期化
+window.addEventListener('load', () => {
+  initBGM();
+});
+
+// 入力フォーカス時のスクロール調整
+input.addEventListener('focus', () => {
+  setTimeout(() => {
+    input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 300); // iOSキーボードのアニメーション待ち
+});
+
 // 送信ボタンの初期化と入力イベントリスナー
 sendButton.disabled = true;
 input.addEventListener('input', () => {
@@ -99,9 +124,12 @@ function initBGM() {
   shuffledPlaylist = shuffle(bgmFiles);
   bgmPlayer.src = shuffledPlaylist[0];
   bgmPlayer.volume = 0.5;
-  bgmPlayer.autoplay = false;
+  bgmPlayer.autoplay = true;
   bgmPlayer.loop = false;
   bgmPlayer.preload = 'metadata';
+  bgmPlayer.play();
+  isPlaying = true;
+  bgmToggle.textContent = '🔇 BGM OFF';
 }
 
 // BGMの再生
@@ -309,7 +337,11 @@ async function handleSend() {
 }
 
 // イベントリスナーの設定
-sendButton.addEventListener('click', handleSend);
+sendButton.addEventListener('click', () => {
+  handleSend();
+  // ユーザーがメッセージを送信したときにBGMを再生
+  bgmPlayer.play();
+});
 
 // 日本語入力中の判定
 let isComposing = false;
