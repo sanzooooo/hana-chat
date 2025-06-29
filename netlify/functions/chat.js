@@ -1,9 +1,37 @@
-const OpenAI = require('openai');
+const { OpenAI } = require("openai");
 
-exports.handler = async (event) => {
+exports.handler = async function(event) {
   try {
-    const { message } = JSON.parse(event.body);
+    // リクエストボディのパース
+    const { message } = JSON.parse(event.body || '{}');
     
+    if (!message) {
+      return {
+        statusCode: 400,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET,HEAD,PUT,PATCH,POST,DELETE'
+        },
+        body: JSON.stringify({ error: "メッセージが必要です" })
+      };
+    }
+
+    // APIキーの確認
+    if (!process.env.OPENAI_API_KEY) {
+      return {
+        statusCode: 500,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET,HEAD,PUT,PATCH,POST,DELETE'
+        },
+        body: JSON.stringify({
+          error: 'APIキーが設定されていません'
+        })
+      };
+    }
+
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
     });
@@ -22,6 +50,36 @@ exports.handler = async (event) => {
       ]
     });
 
+    // レスポンスの確認
+    if (!completion.choices || completion.choices.length === 0) {
+      return {
+        statusCode: 500,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET,HEAD,PUT,PATCH,POST,DELETE'
+        },
+        body: JSON.stringify({
+          error: 'AIの応答が取得できませんでした'
+        })
+      };
+    }
+
+    const response = completion.choices[0].message.content;
+    if (!response) {
+      return {
+        statusCode: 500,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET,HEAD,PUT,PATCH,POST,DELETE'
+        },
+        body: JSON.stringify({
+          error: 'AIの応答が空です'
+        })
+      };
+    }
+
     return {
       statusCode: 200,
       headers: {
@@ -30,7 +88,7 @@ exports.handler = async (event) => {
         'Access-Control-Allow-Methods': 'GET,HEAD,PUT,PATCH,POST,DELETE'
       },
       body: JSON.stringify({
-        response: completion.choices[0].message.content
+        response: response
       })
     };
   } catch (error) {
