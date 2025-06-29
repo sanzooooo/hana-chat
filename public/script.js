@@ -76,47 +76,75 @@ function handleUserInteraction() {
     initBGM();
     bgmInitialized = true;
   }
+  // チャット開始時にスクロールとプルダウン防止
+  document.body.classList.add('fixed');
+  toggleScrollPrevention(true);
 }
 
-window.addEventListener('click', handleUserInteraction, { once: true });
-window.addEventListener('touchstart', handleUserInteraction, { once: true });
+// チャット終了時にスクロール固定を解除
+function releaseScroll() {
+  document.body.classList.remove('fixed');
+  toggleScrollPrevention(false);
+}
 
-// ========== チャット送信 ==========
-chatForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const message = userInput.value.trim();
-  if (message === '') return;
-
-  // ユーザーのメッセージを追加
-  addMessage('user', message);
-  userInput.value = '';
+// チャットフォームの送信処理にスクロール固定の解除を追加
+chatForm.addEventListener('submit', async function handleSend() {
+  console.log('送信開始:', userInput.value);
+  
   sendButton.disabled = true;
+  const userInputValue = userInput.value.trim();
+  if (!userInputValue) return;
 
-  // ローディングメッセージを追加
+  console.log('ユーザー入力:', userInputValue);
+  
+  addMessage('user', userInputValue);
+  userInput.value = '';
+
   addMessage('bot', '…考え中…');
 
   try {
+    console.log('API呼び出し開始');
     const response = await fetch('/.netlify/functions/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message })
+      body: JSON.stringify({ message: userInputValue })
     });
-
-    if (!response.ok) throw new Error('サーバーエラー');
-
+    
+    console.log('レスポンスステータス:', response.status);
+    console.log('レスポンスヘッダー:', response.headers);
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`HTTPエラー: ${response.status} ${response.statusText} - ${errorData.error || '詳細不明'}`);
+    }
+    
     const data = await response.json();
-    console.log("Botの応答データ:", data);
-
-    // 最後のbotメッセージ（考え中…）を削除
+    console.log('API応答:', data);
+    
+    // 最後のbotメッセージ削除（考え中…など）
     const lastBot = chatBox.querySelector('.chat-message.bot:last-child');
     if (lastBot) chatBox.removeChild(lastBot);
-
-    // 本応答を追加
-    addMessage('bot', data.reply, data.imageUrl);
+    
+    // 成功レスポンスの場合
+    if (data.response) {
+      addMessage('hana', data.response);
+    } else if (data.error) {
+      addMessage('hana', `⚠️${data.error}`);
+    } else {
+      console.warn('無効なレスポンス形式:', data);
+      addMessage('hana', '⚠️応答が取得できませんでした');
+    }
   } catch (error) {
-    addMessage('bot', '通信エラーが発生しました。もう一度試してください。');
+    console.error('エラー詳細:', {
+      message: error.message,
+      name: error.name,
+      stack: error.stack
+    });
+    addMessage('hana', `⚠️${error.message}`);
   } finally {
+    console.log('処理完了');
     sendButton.disabled = false;
+    releaseScroll();
   }
 });
 
@@ -145,4 +173,5 @@ function addMessage(sender, text, imageUrl = null) {
   chatBox.appendChild(messageEl);
   chatBox.scrollTop = chatBox.scrollHeight;
 }
+
 
